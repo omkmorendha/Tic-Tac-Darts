@@ -284,9 +284,93 @@ void draw_scenery(){
     glDeleteTextures(1, &grass_2d);
 }
 
-void draw_dart(){
-    
+void draw_dart(int p, float x, float y, float z){
+    glTranslatef(x, y, z);
+    GLuint red_dart_2d = SOIL_load_OGL_texture
+    (
+        "red_dart.jpeg",
+        SOIL_LOAD_AUTO,
+        SOIL_CREATE_NEW_ID,
+        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
+    );
+
+    GLuint blue_dart_2d = SOIL_load_OGL_texture
+    (
+        "blue_dart.jpeg",
+        SOIL_LOAD_AUTO,
+        SOIL_CREATE_NEW_ID,
+        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
+    );
+
+    glScalef(0.03125, 0.03125, 0.5);
+    glRotatef(180, 1, 0, 0);
+
+    if(p == 1)
+        glBindTexture(GL_TEXTURE_2D, red_dart_2d);
+    else
+        glBindTexture(GL_TEXTURE_2D, blue_dart_2d);
+
+    glBegin(GL_QUADS);
+        glTexCoord2f(0, 0); glVertex3f(1, 1, 1);
+        glTexCoord2f(1, 0); glVertex3f(1, 1, -1);
+        glTexCoord2f(1, 1); glVertex3f(-1, 1, -1);
+        glTexCoord2f(0, 1); glVertex3f(-1, 1, 1);
+
+        glTexCoord2f(1, 1); glVertex3f(-1, 1, -1);
+        glTexCoord2f(0, 1); glVertex3f(-1, 1, 1);
+        glTexCoord2f(1, 1); glVertex3f(-1, -1, 1);
+        glTexCoord2f(0, 1); glVertex3f(-1, -1, -1);
+
+        glTexCoord2f(1, 1); glVertex3f(-1, 1, 1);
+        glTexCoord2f(0, 1); glVertex3f(1, 1, 1);
+        glTexCoord2f(1, 1); glVertex3f(1, -1, 1);
+        glTexCoord2f(0, 1); glVertex3f(-1, -1, 1);
+
+        glTexCoord2f(0, 0); glVertex3f(1, -1, 1);
+        glTexCoord2f(1, 0); glVertex3f(1, -1, -1);
+        glTexCoord2f(1, 1); glVertex3f(-1, -1, -1);
+        glTexCoord2f(0, 1); glVertex3f(-1, -1, 1);
+
+        glTexCoord2f(1, 1); glVertex3f(1, 1, -1);
+        glTexCoord2f(0, 1); glVertex3f(1, 1, 1);
+        glTexCoord2f(1, 1); glVertex3f(1, -1, 1);
+        glTexCoord2f(0, 1); glVertex3f(1, -1, -1);
+
+        glTexCoord2f(1, 1); glVertex3f(-1, 1, -1);
+        glTexCoord2f(0, 1); glVertex3f(1, 1, -1);
+        glTexCoord2f(1, 1); glVertex3f(1, -1, -1);
+        glTexCoord2f(0, 1); glVertex3f(-1, -1, -1);
+    glEnd();
+
+    glColor3f(1, 1, 1);
+    glDeleteTextures(1, &red_dart_2d); 
+    glDeleteTextures(1, &blue_dart_2d);
+
+    glColor3f(0.66, 0.66, 0.66);
+    glTranslatef(0, 0, 1);
+    glutSolidCone(1, 0.8, 8, 8);
+    glTranslatef(0, 0, -1);
+    glRotatef(180, 1, 0, 0);
+    glScalef(32, 32, 2);
+
+    glTranslatef(0, 0, 2);
+    glBegin(GL_TRIANGLES);
+        glVertex3f(0, 0.1, -1.5);
+        glVertex3f(0, -0.1, -1.5);
+        glVertex3f(0, 0, -1.6);
+    glEnd();
+    glRotatef(90, 0, 0, 1);
+    glBegin(GL_TRIANGLES);
+        glVertex3f(0, 0.1, -1.5);
+        glVertex3f(0, -0.1, -1.5);
+        glVertex3f(0, 0, -1.6);
+    glEnd();
+    glRotatef(-90, 0, 0, 1);
+    glTranslatef(0, 0, -2);
+    glTranslatef(-x, -y, -z);
 }
+
+float x = -0.4, y = 0, z = 3;
 
 void display(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -306,10 +390,13 @@ void display(){
 
     glTranslatef(0, 0, 0.001);
     draw_all_bull();
-    glTranslatef(0, 0, -0.001);
 
     glLoadIdentity();
-    draw_dart();
+    gluLookAt(0, 0, 7, 0, 0, 0, 0, 1, 0);
+    draw_dart(1, -3, -1, 3); //Fake Dart
+    
+    draw_dart(1, x, y, z);
+    draw_dart(2, 1, -1, z);
 
     glutSwapBuffers();
     glFlush();
@@ -323,12 +410,20 @@ void reshape(int width, int height){
     gluPerspective(50, aspect, 0.1, 100);  
 }
 
+void update(int val){
+    z -= 0.075;
+
+    glutTimerFunc(100, update, 0);
+    glutPostRedisplay();
+}
+
 int main(int argc, char** argv){
     glutInit(&argc,argv);
 
     myinit();
     glutReshapeFunc(reshape);
     glutDisplayFunc(display);
+    glutTimerFunc(100, update, 0);
     glutMainLoop();
     return 0;
 }
