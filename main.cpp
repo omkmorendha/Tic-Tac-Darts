@@ -129,14 +129,60 @@ void setbullco(){
     bull[2][2].centrez = 0;  
 }
 
-void display(){
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    gluLookAt(0, 0, 2, 0, 0, 0, 0, 1, 0);
+void draw_all_bull(){
+    for(int i = 0; i < 3; i++){
+        for(int j = 0; j < 3; j++)
+            bull[i][j].draw();
+    }
+}
 
-    setbullco();
-    glTranslatef(0, 0, -5);
+void draw_board_border(){
+    GLuint wood2_2d = SOIL_load_OGL_texture
+    (
+        "wood2.jpeg",
+        SOIL_LOAD_AUTO,
+        SOIL_CREATE_NEW_ID,
+        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
+    );
+
+    glBindTexture(GL_TEXTURE_2D, wood2_2d);
+    glBegin(GL_QUADS);
+        glTexCoord2f(0, 0); glVertex3f(1, 1, 1);
+        glTexCoord2f(1, 0); glVertex3f(1, 1, -1);
+        glTexCoord2f(1, 1); glVertex3f(-1, 1, -1);
+        glTexCoord2f(0, 1); glVertex3f(-1, 1, 1);
+
+        glTexCoord2f(1, 1); glVertex3f(-1, 1, -1);
+        glTexCoord2f(0, 1); glVertex3f(-1, 1, 1);
+        glTexCoord2f(1, 1); glVertex3f(-1, -1, 1);
+        glTexCoord2f(0, 1); glVertex3f(-1, -1, -1);
+
+        glTexCoord2f(1, 1); glVertex3f(-1, 1, 1);
+        glTexCoord2f(0, 1); glVertex3f(1, 1, 1);
+        glTexCoord2f(1, 1); glVertex3f(1, -1, 1);
+        glTexCoord2f(0, 1); glVertex3f(-1, -1, 1);
+
+        glTexCoord2f(0, 0); glVertex3f(1, -1, 1);
+        glTexCoord2f(1, 0); glVertex3f(1, -1, -1);
+        glTexCoord2f(1, 1); glVertex3f(-1, -1, -1);
+        glTexCoord2f(0, 1); glVertex3f(-1, -1, 1);
+
+        glTexCoord2f(1, 1); glVertex3f(1, 1, -1);
+        glTexCoord2f(0, 1); glVertex3f(1, 1, 1);
+        glTexCoord2f(1, 1); glVertex3f(1, -1, 1);
+        glTexCoord2f(0, 1); glVertex3f(1, -1, -1);
+
+        glTexCoord2f(1, 1); glVertex3f(-1, 1, -1);
+        glTexCoord2f(0, 1); glVertex3f(1, 1, -1);
+        glTexCoord2f(1, 1); glVertex3f(1, -1, -1);
+        glTexCoord2f(0, 1); glVertex3f(-1, -1, -1);
+    glEnd();
+
+    glDeleteTextures(1, &wood2_2d);
+}
+
+void draw_board(){
+    
     GLuint wood_2d = SOIL_load_OGL_texture
     (
         "wood.jpeg",
@@ -144,6 +190,37 @@ void display(){
         SOIL_CREATE_NEW_ID,
         SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
     );
+
+    glBindTexture(GL_TEXTURE_2D, wood_2d);
+    glTranslatef(0, 0, 0.001);
+    glBegin(GL_QUADS);
+        glTexCoord2f(0, 0); glVertex3f(-1, 1, -0.1);
+        glTexCoord2f(1, 0); glVertex3f(1, 1, -0.1);
+        glTexCoord2f(1, 1); glVertex3f(1, -1, -0.1);
+        glTexCoord2f(0, 1); glVertex3f(-1, -1, -0.1);
+    glEnd();
+
+    glDeleteTextures(1, &wood_2d);
+    glTranslatef(0, 1, 0);
+    glScalef(1, 0.05, 0.25);
+    
+    draw_board_border();
+    glTranslatef(0, -40, 0);
+    draw_board_border();
+    glTranslatef(0, 40, 0);
+    glScalef(1, 20, 4);
+    glScalef(0.05, 1, 0.25);
+    glTranslatef(-20, -1, 0);
+    draw_board_border();
+    glTranslatef(40, 0, 0);
+    draw_board_border();
+    glTranslatef(-20, 1, 0);
+
+    glScalef(20, 1, 4);
+    glTranslatef(0, -1, 0);
+}
+
+void draw_scenery(){
     GLuint brick_2d = SOIL_load_OGL_texture
     (
         "brick.jpeg",
@@ -202,22 +279,24 @@ void display(){
         glTexCoord2f(0, 1); glVertex3f(-1.2, -1.2, 6);
     glEnd();
 
-    glBindTexture(GL_TEXTURE_2D, wood_2d);
-    if( 0 == wood_2d )
-    {
-        printf( "SOIL loading error: '%s'\n", SOIL_last_result() );
-    }
+    glDeleteTextures(1, &brick_2d);
+    glDeleteTextures(1, &sky_2d);
+    glDeleteTextures(1, &grass_2d);
+}
 
-    glColor3f(1, 1, 1);
-    glTranslatef(0, 0, 0.001);
-    glBegin(GL_QUADS);
-        glTexCoord2f(0, 0); glVertex3f(-1, 1, -0.1);
-        glTexCoord2f(1, 0); glVertex3f(1, 1, -0.1);
-        glTexCoord2f(1, 1); glVertex3f(1, -1, -0.1);
-        glTexCoord2f(0, 1); glVertex3f(-1, -1, -0.1);
-    glEnd();
+void draw_dart(){
+    
+}
 
-    glDeleteTextures(1, &wood_2d);
+void display(){
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    gluLookAt(0, 0, 7, 0, 0, 0, 0, 1, 0);
+
+    setbullco();
+    draw_scenery();
+    draw_board();
 
     bull[0][1].stat = 1;
     bull[0][1].score = 2;
@@ -226,10 +305,11 @@ void display(){
     bull[0][2].score = 7;
 
     glTranslatef(0, 0, 0.001);
-    for(int i = 0; i < 3; i++){
-        for(int j = 0; j < 3; j++)
-            bull[i][j].draw();
-    }
+    draw_all_bull();
+    glTranslatef(0, 0, -0.001);
+
+    glLoadIdentity();
+    draw_dart();
 
     glutSwapBuffers();
     glFlush();
