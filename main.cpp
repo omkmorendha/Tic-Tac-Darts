@@ -5,6 +5,10 @@
 #include <iostream>
 using namespace std;
 
+int status = 0;
+int istat = 0;
+int player = 1;
+
 void myinit(){
     glutInitWindowSize(1920, 1080);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
@@ -90,6 +94,23 @@ class bullseye{
     }
 
 } bull[3][3];
+
+int check(){
+    for(int i = 0; i < 3; i++){
+        if(bull[i][0].stat == bull[i][1].stat && bull[i][1].stat == bull[i][2].stat)
+            return bull[i][0].stat;
+        if(bull[0][i].stat == bull[1][i].stat && bull[1][i].stat == bull[2][i].stat)
+            return bull[i][0].stat;
+    }
+
+    if(bull[0][0].stat == bull[1][1].stat && bull[1][1].stat == bull[2][2].stat)
+        return bull[0][0].stat;
+    
+    if(bull[0][2].stat == bull[1][1].stat && bull[1][1].stat == bull[2][0].stat)
+        return bull[1][1].stat;
+    
+    return -1;
+}
 
 void setbullco(){
     bull[0][0].centrex = -0.5;
@@ -368,9 +389,113 @@ void draw_dart(int p, float x, float y, float z){
     glRotatef(-90, 0, 0, 1);
     glTranslatef(0, 0, -2);
     glTranslatef(-x, -y, -z);
+    glColor3f(1, 1, 1);
 }
 
-float x = -0.4, y = 0, z = 3;
+void draw_aim(float x, float y){
+    glBegin(GL_POINTS);
+    glColor3f(1, 1, 0);
+
+    for(int i = 0; i < 1000; i++)
+        glVertex3f(x + 0.25 * cos(M_PI * i / 500), y + 0.25 * sin(M_PI * i / 500), 0);  
+    
+    for(int i = 0; i < 1000; i++)
+        glVertex3f(x + 0.23 * cos(M_PI * i / 500), y + 0.23 * sin(M_PI * i / 500), 0);  
+
+    glEnd();
+    glColor3f(1, 1, 1);
+}
+
+void draw_pow(){
+    glBegin(GL_QUADS);
+        glColor3f(1, 1, 1);
+        glVertex3f(-0.9, 1.5, 0);
+        glVertex3f(0.9, 1.5, 0);
+        glVertex3f(0.9, 1.3, 0);
+        glVertex3f(-0.9, 1.3, 0);
+
+        glColor3f(1, 0, 0);
+        glVertex3f(-0.75, 1.475, 0.001);
+        glVertex3f(0.75, 1.475, 0.001);
+        glVertex3f(0.75, 1.325, 0.001);
+        glVertex3f(-0.75, 1.325, 0.001);
+
+        glColor3f(1, 1, 0);
+        glVertex3f(-0.4, 1.475, 0.002);
+        glVertex3f(0.4, 1.475, 0.002);
+        glVertex3f(0.4, 1.325, 0.002);
+        glVertex3f(-0.4, 1.325, 0.002);
+
+        glColor3f(0, 1, 0);
+        glVertex3f(-0.1, 1.475, 0.003);
+        glVertex3f(0.1, 1.475, 0.003);
+        glVertex3f(0.1, 1.325, 0.003);
+        glVertex3f(-0.1, 1.325, 0.003);
+    glEnd();
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    glBegin(GL_QUADS);
+        glColor3f(0, 0, 0);
+        glVertex3f(-0.9, 1.5, 0.001);
+        glVertex3f(0.9, 1.5, 0.001);
+        glVertex3f(0.9, 1.3, 0.001);
+        glVertex3f(-0.9, 1.3, 0.001);
+
+        glVertex3f(-0.75, 1.475, 0.002);
+        glVertex3f(0.75, 1.475, 0.002);
+        glVertex3f(0.75, 1.325, 0.002);
+        glVertex3f(-0.75, 1.325, 0.002);
+
+        glVertex3f(-0.4, 1.475, 0.003);
+        glVertex3f(0.4, 1.475, 0.003);
+        glVertex3f(0.4, 1.325, 0.003);
+        glVertex3f(-0.4, 1.325, 0.003);
+
+        glVertex3f(-0.1, 1.475, 0.004);
+        glVertex3f(0.1, 1.475, 0.004);
+        glVertex3f(0.1, 1.325, 0.004);
+        glVertex3f(-0.1, 1.325, 0.004);
+    glEnd();
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
+float aim_x = 0;
+float aim_y = 0;
+float powline = 0;
+int powflip = 1;
+
+void draw_pow_line(){
+    glColor3f(0, 0, 0);
+
+    glTranslatef(powline, 0, 0);
+    glBegin(GL_QUADS);
+        glVertex3f(-0.05, 1.475, 0.005);
+        glVertex3f(0.05, 1.475, 0.005);
+        glVertex3f(0.05, 1.325, 0.005);
+        glVertex3f(-0.05, 1.325, 0.005);
+    glEnd();
+    glTranslatef(-powline, 0, 0);
+}
+
+float dartang = 0;
+float dartx = 0, darty = -0.5, dartz = 5;
+
+void throw_dart(){
+    //float ang = acos(dartz / sqrt((dartx - aim_x) * (dartx - aim_x) + dartz));
+    // float ang = 10;
+
+    // glTranslatef(-dartx, -darty, -dartz);
+    // glRotatef(ang, 0, 1, 0);
+    // glTranslatef(dartx, darty, dartz);
+
+    draw_dart(player, dartx, darty, dartz);
+
+    // glTranslatef(-dartx, -darty, -dartz);
+    // glRotatef(-ang, 0, 1, 0);
+    // glTranslatef(dartx, darty, dartz);
+}
 
 void display(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -382,22 +507,26 @@ void display(){
     draw_scenery();
     draw_board();
 
-    bull[0][1].stat = 1;
-    bull[0][1].score = 2;
-
-    bull[0][2].stat = 2;
-    bull[0][2].score = 7;
-
     glTranslatef(0, 0, 0.001);
     draw_all_bull();
 
     glLoadIdentity();
     gluLookAt(0, 0, 7, 0, 0, 0, 0, 1, 0);
-    draw_dart(1, -3, -1, 3); //Fake Dart
-    
-    draw_dart(1, x, y, z);
-    draw_dart(2, 1, -1, z);
 
+    if(istat == 0)
+        draw_aim(aim_x, aim_y);
+    else if(istat == 1){
+        draw_pow();
+        draw_pow_line();
+    }
+    else if(istat == 2){
+        draw_pow();
+        draw_pow_line();
+        draw_dart(1, -3, -1, 3); //Fake Dart
+        throw_dart();
+    }
+
+    glColor3f(1, 1, 1);
     glutSwapBuffers();
     glFlush();
 }
@@ -411,10 +540,60 @@ void reshape(int width, int height){
 }
 
 void update(int val){
-    z -= 0.075;
-
+    if(istat == 1){
+        if(powline >= 0.67){
+            powflip = -1;
+            powline -= 0.03;
+        }
+        else if(powline <= -0.67){
+            powflip = 1;
+            powline += 0.03;
+        }
+        else if(powflip == 1)
+            powline += 0.03;
+        else if(powflip == -1)
+            powline -= 0.03;
+    }
+    else if(istat == 2){
+        if(dartz > 0){
+            dartz -= 0.1;
+        }
+        else{
+            player = (player == 1) ? 2 : 1;
+            dartx = 0;
+            darty = -0.5;
+            dartz = 5;
+            istat = 0;
+            aim_x = 0;
+            aim_y = 0;
+            powline = 0;
+            powflip = 1;
+        }
+    }
+    
     glutTimerFunc(100, update, 0);
     glutPostRedisplay();
+}
+
+void aim_key(unsigned char key, int x, int y){
+    if(istat == 0){
+        if((key == 'w' || key == 'W') && aim_y < 0.65)
+            aim_y += 0.05;    
+        else if((key == 's' || key == 'S')  && aim_y > -0.65)
+            aim_y -= 0.05;
+        else if((key == 'a' || key == 'A')  && aim_x > -0.65)
+            aim_x -= 0.05;
+        else if((key == 'd' || key == 'D')  && aim_x < 0.65)
+            aim_x += 0.05;
+        else if(key == 'm' || key == 'M')
+            istat = 1;
+    }
+    else if(istat == 1){
+        if(key == 'm' || key == 'M'){
+            istat = 2;   
+        }
+    }
+    
 }
 
 int main(int argc, char** argv){
@@ -422,7 +601,10 @@ int main(int argc, char** argv){
 
     myinit();
     glutReshapeFunc(reshape);
+    
     glutDisplayFunc(display);
+
+    glutKeyboardFunc(aim_key);
     glutTimerFunc(100, update, 0);
     glutMainLoop();
     return 0;
