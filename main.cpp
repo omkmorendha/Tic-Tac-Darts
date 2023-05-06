@@ -8,6 +8,9 @@ using namespace std;
 int status = 0;
 int istat = 0;
 int player = 1;
+int rounds = 0;
+int redscore = 0;
+int bluescore = 0;
 
 void myinit(){
     glutInitWindowSize(1920, 1080);
@@ -96,20 +99,23 @@ class bullseye{
 } bull[3][3];
 
 int check(){
+    if(rounds == 18)
+        return -1;
+
     for(int i = 0; i < 3; i++){
         if(bull[i][0].stat == bull[i][1].stat && bull[i][1].stat == bull[i][2].stat)
             return bull[i][0].stat;
         if(bull[0][i].stat == bull[1][i].stat && bull[1][i].stat == bull[2][i].stat)
-            return bull[i][0].stat;
+            return bull[0][i].stat;
     }
 
     if(bull[0][0].stat == bull[1][1].stat && bull[1][1].stat == bull[2][2].stat)
-        return bull[0][0].stat;
+        return bull[1][1].stat;
     
     if(bull[0][2].stat == bull[1][1].stat && bull[1][1].stat == bull[2][0].stat)
         return bull[1][1].stat;
     
-    return -1;
+    return 0;
 }
 
 void setbullco(){
@@ -513,43 +519,68 @@ void collide(){
 
         if((10 - r) > bull[fi][fj].score){
             bull[fi][fj].score = 10 - r;
-            bull[fi][fj].stat = player;  
+            bull[fi][fj].stat = player;
+
+            if (player == 1){
+                redscore += 10 - r;
+                bluescore -= 10 - r;
+            }
+            else{
+                redscore += 10 - r;
+                bluescore -= 10 - r;
+            }  
         }
     }
 }
 
-void display(){
+void outro(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(0, 0, 0, 1);
     glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    gluLookAt(0, 0, 7, 0, 0, 0, 0, 1, 0);
+    glLoadIdentity();    
 
-    setbullco();
-    draw_scenery();
-    draw_board();
-
-    glTranslatef(0, 0, 0.001);
-    draw_all_bull();
-
-    glLoadIdentity();
-    gluLookAt(0, 0, 7, 0, 0, 0, 0, 1, 0);
-
-    if(istat == 0)
-        draw_aim(aim_x, aim_y);
-    else if(istat == 1){
-        draw_pow();
-        draw_pow_line();
-    }
-    else if(istat == 2){
-        draw_pow();
-        draw_pow_line();
-        draw_dart(1, -3, -1, 3); //Fake Dart
-        draw_dart(player, dartx, darty, dartz);
-    }
-
-    glColor3f(1, 1, 1);
     glutSwapBuffers();
     glFlush();
+}
+
+void display(){
+    if(check() != 0){
+        outro();
+    }
+    else
+    {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        gluLookAt(0, 0, 7, 0, 0, 0, 0, 1, 0);
+
+        setbullco();
+        draw_scenery();
+        draw_board();
+
+        glTranslatef(0, 0, 0.001);
+        draw_all_bull();
+
+        glLoadIdentity();
+        gluLookAt(0, 0, 7, 0, 0, 0, 0, 1, 0);
+
+        if(istat == 0)
+            draw_aim(aim_x, aim_y);
+        else if(istat == 1){
+            draw_pow();
+            draw_pow_line();
+        }
+        else if(istat == 2){
+            draw_pow();
+            draw_pow_line();
+            draw_dart(1, -3, -1, 3); //Fake Dart
+            draw_dart(player, dartx, darty, dartz);
+        }
+
+        glColor3f(1, 1, 1);
+        glutSwapBuffers();
+        glFlush();
+    }
 }
 
 void reshape(int width, int height){
@@ -564,16 +595,16 @@ void update(int val){
     if(istat == 1){
         if(powline >= 0.67){
             powflip = -1;
-            powline -= 0.05;
+            powline -= 0.075;
         }
         else if(powline <= -0.67){
             powflip = 1;
-            powline += 0.05;
+            powline += 0.075;
         }
         else if(powflip == 1)
-            powline += 0.05;
+            powline += 0.075;
         else if(powflip == -1)
-            powline -= 0.05;
+            powline -= 0.075;
     }
     else if(istat == 2){
         if(dartz > 0){
@@ -584,6 +615,7 @@ void update(int val){
         else{
             collide();
 
+            rounds++;
             player = (player == 1) ? 2 : 1;
             dartx = 0;
             darty = -1;
