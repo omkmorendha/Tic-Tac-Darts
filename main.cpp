@@ -305,7 +305,14 @@ void draw_scenery(){
     glDeleteTextures(1, &grass_2d);
 }
 
+float dartang_1 = 0, dartang_2 = 0;
+
 void draw_dart(int p, float x, float y, float z){
+    glLoadIdentity();
+    gluLookAt(0, 0, 7, 0, 0, 0, 0, 1, 0);
+
+    glRotatef(dartang_1, 0, 1, 0);
+    glRotatef(dartang_2, 0, 0, 1);
     glTranslatef(x, y, z);
     GLuint red_dart_2d = SOIL_load_OGL_texture
     (
@@ -389,6 +396,8 @@ void draw_dart(int p, float x, float y, float z){
     glRotatef(-90, 0, 0, 1);
     glTranslatef(0, 0, -2);
     glTranslatef(-x, -y, -z);
+    glRotatef(-dartang_2, 0, 0, 1);
+    glRotatef(-dartang_1, 0, 1, 0);
     glColor3f(1, 1, 1);
 }
 
@@ -479,22 +488,34 @@ void draw_pow_line(){
     glTranslatef(-powline, 0, 0);
 }
 
-float dartang = 0;
-float dartx = 0, darty = -0.5, dartz = 5;
+float dartx = 0, darty = -1, dartz = 5;
 
-void throw_dart(){
-    //float ang = acos(dartz / sqrt((dartx - aim_x) * (dartx - aim_x) + dartz));
-    // float ang = 10;
+void collide(){
+    int fi = -1, fj = - 1;
+    
+    for(int i = 0; i < 3; i++){
+        for(int j = 0; j < 3; j++){
+            float d = sqrt((bull[i][j].centrex - dartx) * (bull[i][j].centrex - dartx) + (bull[i][j].centrey - darty) * (bull[i][j].centrey - darty));
 
-    // glTranslatef(-dartx, -darty, -dartz);
-    // glRotatef(ang, 0, 1, 0);
-    // glTranslatef(dartx, darty, dartz);
+            if(d < 0.2){
+                fi = i; 
+                fj = j;
+            }
+                
+        }
+    }
 
-    draw_dart(player, dartx, darty, dartz);
+    if(fi != -1){
+        float d = sqrt((bull[fi][fj].centrex - dartx) * (bull[fi][fj].centrex - dartx) + (bull[fi][fj].centrey - darty) * (bull[fi][fj].centrey - darty));
 
-    // glTranslatef(-dartx, -darty, -dartz);
-    // glRotatef(-ang, 0, 1, 0);
-    // glTranslatef(dartx, darty, dartz);
+        d /= 0.02;
+        int r = floor(d);
+
+        if((10 - r) > bull[fi][fj].score){
+            bull[fi][fj].score = 10 - r;
+            bull[fi][fj].stat = player;  
+        }
+    }
 }
 
 void display(){
@@ -523,7 +544,7 @@ void display(){
         draw_pow();
         draw_pow_line();
         draw_dart(1, -3, -1, 3); //Fake Dart
-        throw_dart();
+        draw_dart(player, dartx, darty, dartz);
     }
 
     glColor3f(1, 1, 1);
@@ -543,25 +564,29 @@ void update(int val){
     if(istat == 1){
         if(powline >= 0.67){
             powflip = -1;
-            powline -= 0.03;
+            powline -= 0.05;
         }
         else if(powline <= -0.67){
             powflip = 1;
-            powline += 0.03;
+            powline += 0.05;
         }
         else if(powflip == 1)
-            powline += 0.03;
+            powline += 0.05;
         else if(powflip == -1)
-            powline -= 0.03;
+            powline -= 0.05;
     }
     else if(istat == 2){
         if(dartz > 0){
-            dartz -= 0.1;
+            dartz -= 0.4;
+            darty += exp(powline) * (aim_y + 1) / 12.5;
+            dartx += aim_x / 12.5;
         }
         else{
+            collide();
+
             player = (player == 1) ? 2 : 1;
             dartx = 0;
-            darty = -0.5;
+            darty = -1;
             dartz = 5;
             istat = 0;
             aim_x = 0;
@@ -591,6 +616,12 @@ void aim_key(unsigned char key, int x, int y){
     else if(istat == 1){
         if(key == 'm' || key == 'M'){
             istat = 2;   
+
+            dartang_2 = exp(powline) * (aim_y + 1) / 0.4;
+
+            dartang_1 = acos(5 / sqrt(25 + (aim_x - dartx) * (aim_x - dartx))) * 180 / M_PI;
+            if (aim_x > 0)
+                dartang_1 *= -1;
         }
     }
     
