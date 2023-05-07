@@ -110,16 +110,20 @@ int check(){
     }
 
     for(int i = 0; i < 3; i++){
-        if(bull[i][0].stat == bull[i][1].stat && bull[i][1].stat == bull[i][2].stat)
+        if(bull[i][0].stat == bull[i][1].stat && bull[i][1].stat == bull[i][2].stat && bull[i][0].stat != 0){
             return bull[i][0].stat;
-        if(bull[0][i].stat == bull[1][i].stat && bull[1][i].stat == bull[2][i].stat)
-            return bull[0][i].stat;
+        }
+            
+        if(bull[0][i].stat == bull[1][i].stat && bull[1][i].stat == bull[2][i].stat && bull[0][i].stat != 0){
+            return player;
+        }
+            
     }
 
-    if(bull[0][0].stat == bull[1][1].stat && bull[1][1].stat == bull[2][2].stat)
+    if(bull[0][0].stat == bull[1][1].stat && bull[1][1].stat == bull[2][2].stat  && bull[1][1].stat != 0)
         return bull[1][1].stat;
     
-    if(bull[0][2].stat == bull[1][1].stat && bull[1][1].stat == bull[2][0].stat)
+    if(bull[0][2].stat == bull[1][1].stat && bull[1][1].stat == bull[2][0].stat  && bull[1][1].stat != 0)
         return bull[1][1].stat;
     
     return 0;
@@ -483,8 +487,8 @@ void draw_pow(){
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
-float aim_x = (float) rand()/RAND_MAX * 0.67;
-float aim_y = (float) rand()/RAND_MAX * 0.67;
+float aim_x = ((float) rand()/RAND_MAX * 1.34) - 0.67;
+float aim_y = ((float) rand()/RAND_MAX * 1.34) - 0.67;
 float powline = 0;
 int powflip = 1;
 
@@ -601,28 +605,28 @@ void reshape(int width, int height){
 void update(int val){
     if(istat == 0){
         v++;
-        if(v >= 50){
+        if(v >= 40){
             istat = 1;
         }
     }
     else if(istat == 1){
         if(powline >= 0.67){
             powflip = -1;
-            powline -= 0.075;
+            powline -= 0.1;
         }
         else if(powline <= -0.67){
             powflip = 1;
-            powline += 0.075;
+            powline += 0.1;
         }
         else if(powflip == 1)
-            powline += 0.075;
+            powline += 0.1;
         else if(powflip == -1)
-            powline -= 0.075;
+            powline -= 0.1;
     }
     else if(istat == 2){
         if(dartz > 0){
             dartz -= 0.4;
-            darty += exp(powline) * (aim_y + 1) / 12.5;
+            darty += exp(powline - 0.1) * (aim_y + 1) / 12.5;
             dartx += aim_x / 12.5;
         }
         else{
@@ -649,18 +653,18 @@ void update(int val){
 void aim_key(unsigned char key, int x, int y){
     if(istat == 0){
         if((key == 'w' || key == 'W') && aim_y < 0.65)
-            aim_y += 0.05;    
+            aim_y += 0.075;    
         else if((key == 's' || key == 'S')  && aim_y > -0.65)
-            aim_y -= 0.05;
+            aim_y -= 0.075;
         else if((key == 'a' || key == 'A')  && aim_x > -0.65)
-            aim_x -= 0.05;
+            aim_x -= 0.075;
         else if((key == 'd' || key == 'D')  && aim_x < 0.65)
-            aim_x += 0.05;
-        else if(key == 'm' || key == 'M')
+            aim_x += 0.075;
+        else if(key == 'm' || key == 'M' || key == ' ')
             istat = 1;
     }
     else if(istat == 1){
-        if(key == 'm' || key == 'M'){
+        if(key == 'm' || key == 'M' || key == ' '){
             istat = 2;   
 
             dartang_2 = exp(powline) * (aim_y + 1) / 0.4;
