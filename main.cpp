@@ -977,12 +977,12 @@ void homeScreen(){
             glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12,msg1_4[i]);
         }
         glRasterPos3f(-0.35,-0.20 + 0.01,-0.3);
-        char msg1_5[] = "Rohan S: ";
+        char msg1_5[] = "Rohan Singh: 20BCS113";
         for(int i=0;i<strlen(msg1_5);i++){
             glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12,msg1_5[i]);
         }
         glRasterPos3f(-0.35,-0.25 + 0.01,-0.3);
-        char msg1_6[] = "Parasa Sai Tarun: ";
+        char msg1_6[] = "Parasa Sai Tarun: 20BCS096";
         for(int i=0;i<strlen(msg1_6);i++){
             glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12,msg1_6[i]);
         }
