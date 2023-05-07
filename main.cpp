@@ -3,6 +3,8 @@
 #include <math.h>
 #include <string.h>
 #include <iostream>
+#include <cstdlib>
+#include <time.h>
 using namespace std;
 
 int status = 0;
@@ -11,6 +13,7 @@ int player = 1;
 int rounds = 0;
 int redscore = 0;
 int bluescore = 0;
+int v = 0;
 
 void myinit(){
     glutInitWindowSize(1920, 1080);
@@ -99,8 +102,12 @@ class bullseye{
 } bull[3][3];
 
 int check(){
-    if(rounds == 18)
-        return -1;
+    if(rounds == 18){
+        if(bluescore < redscore)
+            return 1;
+        else
+            return 2;
+    }
 
     for(int i = 0; i < 3; i++){
         if(bull[i][0].stat == bull[i][1].stat && bull[i][1].stat == bull[i][2].stat)
@@ -476,8 +483,8 @@ void draw_pow(){
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
-float aim_x = 0;
-float aim_y = 0;
+float aim_x = (float) rand()/RAND_MAX * 0.67;
+float aim_y = (float) rand()/RAND_MAX * 0.67;
 float powline = 0;
 int powflip = 1;
 
@@ -592,7 +599,13 @@ void reshape(int width, int height){
 }
 
 void update(int val){
-    if(istat == 1){
+    if(istat == 0){
+        v++;
+        if(v >= 50){
+            istat = 1;
+        }
+    }
+    else if(istat == 1){
         if(powline >= 0.67){
             powflip = -1;
             powline -= 0.075;
@@ -621,10 +634,11 @@ void update(int val){
             darty = -1;
             dartz = 5;
             istat = 0;
-            aim_x = 0;
-            aim_y = 0;
+            aim_x = (float) rand()/RAND_MAX * 0.67;
+            aim_y = (float) rand()/RAND_MAX * 0.67;
             powline = 0;
             powflip = 1;
+            v = 0;
         }
     }
     
@@ -661,6 +675,7 @@ void aim_key(unsigned char key, int x, int y){
 
 int main(int argc, char** argv){
     glutInit(&argc,argv);
+    srand(time(0));
 
     myinit();
     glutReshapeFunc(reshape);
