@@ -561,7 +561,7 @@ void outro(){
     }
 
     if(player == 2){
-        glColor3f(0,0,redColor);
+        glColor3f(redColor,0,0);
 
         glLoadIdentity();
         glPushMatrix();
@@ -572,7 +572,7 @@ void outro(){
         glPopMatrix();
     }
     else{
-        glColor3f(redColor,0,0);
+        glColor3f(0, 0, redColor);
 
         glLoadIdentity();
         glPushMatrix();
@@ -668,7 +668,7 @@ void update(int val){
     else if(istat == 1){
         if(powline >= 0.67){
             powflip = -1;
-            powline -= 0.05;
+            powline -= 0.1;
         }
         else if(powline <= -0.67){
             powflip = 1;
@@ -719,7 +719,7 @@ void homeScreen(){
     glLineWidth(1);
 
     glLoadIdentity();
-    //glColor3f(1,1,1); //to make image stay not coloured
+    glColor3f(1,1,1); //to make image stay not coloured
     GLuint logo = SOIL_load_OGL_texture
     (
         "tic-tac-darts-logo.jpeg",
